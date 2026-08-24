@@ -39,6 +39,7 @@ Give them the instructions in [`PROTOCOL.md`](PROTOCOL.md). They can participate
 - The workflow has explicit repository permissions: read source and write issue comments only.
 - Model responses are stateless API calls with `store: false`.
 - GitHub mutations are serialized with a delay to avoid secondary rate limits.
+- Round starts are kept at least 105 seconds apart, even if a smaller pause is entered, so the issue stays below GitHub's content-creation ceiling.
 - A public GitHub-hosted job can run for at most six hours, so the runner exits cleanly after five and a half hours. Start it again to continue.
 - `/stop` is checked before every round. Canceling the workflow from the Actions page is the immediate emergency stop.
 

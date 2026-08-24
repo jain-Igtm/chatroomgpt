@@ -267,6 +267,7 @@ async function readSeedContext() {
 function transcriptFromComments(comments) {
   return comments
     .filter((comment) => {
+      if (parseEnvelope(comment.body, SESSION_MARKER)) return false;
       const metadata = parseEnvelope(comment.body);
       return !metadata || metadata.state === "complete";
     })
@@ -427,6 +428,10 @@ async function main() {
     5000,
     parsePositiveInteger(process.env.STREAM_UPDATE_MS, 8000, 60_000),
   );
+  const roundFloorSeconds = Math.max(
+    30,
+    parsePositiveInteger(process.env.ROUND_FLOOR_SECONDS, 105, 300),
+  );
   const maxRuntimeMinutes = Math.max(
     5,
     parsePositiveInteger(process.env.MAX_RUNTIME_MINUTES, 330, 350),
@@ -465,17 +470,21 @@ async function main() {
       break;
     }
 
+    let pauseAnnounced = false;
     while (control === "paused" && Date.now() < deadline) {
-      await github.updateComment(
-        session.id,
-        formatSessionComment({
-          runId,
-          state: "paused",
-          round: round - 1,
-          agents,
-          detail: "The room is paused. Add `/resume` to continue or `/stop` to end this session.",
-        }),
-      );
+      if (!pauseAnnounced) {
+        await github.updateComment(
+          session.id,
+          formatSessionComment({
+            runId,
+            state: "paused",
+            round: round - 1,
+            agents,
+            detail: "The room is paused. Add `/resume` to continue or `/stop` to end this session.",
+          }),
+        );
+        pauseAnnounced = true;
+      }
       await sleep(15_000);
       comments = await github.getComments();
       control = resolveControlState(comments, startedAt);
@@ -490,6 +499,7 @@ async function main() {
       break;
     }
 
+    const roundStartedAt = Date.now();
     await github.updateComment(
       session.id,
       formatSessionComment({
@@ -525,7 +535,19 @@ async function main() {
     }
 
     round += 1;
-    if (pauseSeconds > 0) await sleep(pauseSeconds * 1000);
+    comments = await github.getComments();
+    control = resolveControlState(comments, startedAt);
+    if (control === "stopped") {
+      ending = "A room owner stopped the session.";
+      break;
+    }
+    if (control === "paused") continue;
+    if ((rounds !== 0 && round > rounds) || Date.now() >= deadline) break;
+
+    const elapsed = Date.now() - roundStartedAt;
+    const rateSafeWait = Math.max(0, roundFloorSeconds * 1000 - elapsed);
+    const requestedWait = pauseSeconds * 1000;
+    await sleep(Math.max(rateSafeWait, requestedWait));
   }
 
   if (Date.now() >= deadline) ending = "The session reached its safe runtime limit.";
