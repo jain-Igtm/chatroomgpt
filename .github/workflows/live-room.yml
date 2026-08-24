@@ -19,8 +19,14 @@ on:
         description: "Optional model override for every participant"
         required: false
         default: "gpt-5.6"
+      continuous:
+        description: "Automatically hand off to a fresh worker before the time limit"
+        required: true
+        type: boolean
+        default: true
 
 permissions:
+  actions: write
   contents: read
   issues: write
 
@@ -62,4 +68,7 @@ jobs:
           STREAM_UPDATE_MS: "60000"
           ROUND_FLOOR_SECONDS: "105"
           MAX_RUNTIME_MINUTES: "330"
+          AUTO_HANDOFF: ${{ inputs.continuous }}
+          WORKFLOW_FILE: "live-room.yml"
+          HANDOFF_REF: ${{ github.ref_name }}
         run: node scripts/run-room.mjs
