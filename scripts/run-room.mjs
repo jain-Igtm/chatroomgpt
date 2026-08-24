@@ -46,6 +46,14 @@ export function parsePositiveInteger(value, fallback, maximum = Infinity) {
   return Math.min(parsed, maximum);
 }
 
+export function parseBoolean(value, fallback = false) {
+  if (typeof value === "boolean") return value;
+  const normalized = String(value ?? "").trim().toLowerCase();
+  if (["1", "true", "yes", "on"].includes(normalized)) return true;
+  if (["0", "false", "no", "off"].includes(normalized)) return false;
+  return fallback;
+}
+
 export function parseEnvelope(body, marker = MESSAGE_MARKER) {
   if (typeof body !== "string") return null;
   const escapedMarker = marker.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -68,6 +76,22 @@ export function stripEnvelope(body) {
     .replace(/^###\s+[^\n]+\n+/i, "")
     .replace(/\n+<sub>[^\n]*<\/sub>\s*$/i, "")
     .trim();
+}
+
+export function nextRoundNumber(comments) {
+  let latestRound = 0;
+
+  for (const comment of comments) {
+    const metadata = parseEnvelope(comment?.body);
+    const round = Number(metadata?.round);
+    if (Number.isInteger(round) && round > latestRound) latestRound = round;
+  }
+
+  return latestRound + 1;
+}
+
+export function shouldAutoHandoff({ enabled, rounds, exitReason }) {
+  return Boolean(enabled) && rounds === 0 && exitReason === "runtime-limit";
 }
 
 export function resolveControlState(comments, startedAt) {
@@ -228,6 +252,14 @@ function createGithubClient({ repository, issueNumber, token, queue }) {
         "PATCH",
         { body },
         "Update message",
+      );
+    },
+    dispatchWorkflow({ workflowFile, ref, inputs }) {
+      return mutateJson(
+        `/actions/workflows/${encodeURIComponent(workflowFile)}/dispatches`,
+        "POST",
+        { ref, inputs },
+        "Start successor worker",
       );
     },
   };
@@ -419,6 +451,10 @@ async function main() {
 
   const rounds = parsePositiveInteger(process.env.ROUNDS, 0, 500);
   const pauseSeconds = parsePositiveInteger(process.env.PAUSE_SECONDS, 12, 300);
+  const autoHandoff = parseBoolean(process.env.AUTO_HANDOFF, false);
+  const workflowFile = (process.env.WORKFLOW_FILE || "live-room.yml").trim();
+  const handoffRef = (process.env.HANDOFF_REF || process.env.GITHUB_REF_NAME || "main").trim();
+  const modelOverride = process.env.MODEL?.trim() || "";
   const maxOutputTokens = parsePositiveInteger(
     process.env.MAX_OUTPUT_TOKENS,
     500,
@@ -442,30 +478,34 @@ async function main() {
   const runId = process.env.GITHUB_RUN_ID || randomUUID();
   const agents = await loadAgents(
     process.env.AGENTS_FILE || "agents.json",
-    process.env.MODEL?.trim(),
+    modelOverride,
   );
   const seedContext = await readSeedContext();
   const queue = new MutationQueue();
   const github = createGithubClient({ repository, issueNumber, token, queue });
+  let comments = await github.getComments();
+  let round = nextRoundNumber(comments);
 
   const session = await github.createComment(
     formatSessionComment({
       runId,
       state: "running",
-      round: 0,
+      round: round - 1,
       agents,
       detail: "The live session has started. Every participant receives the same snapshot; their responses are now being generated concurrently.",
     }),
   );
 
-  let round = 1;
+  let completedThisRun = 0;
+  let exitReason = "rounds-complete";
   let ending = "The configured rounds are complete.";
 
-  while ((rounds === 0 || round <= rounds) && Date.now() < deadline) {
-    let comments = await github.getComments();
+  while ((rounds === 0 || completedThisRun < rounds) && Date.now() < deadline) {
+    comments = await github.getComments();
     let control = resolveControlState(comments, startedAt);
 
     if (control === "stopped") {
+      exitReason = "stopped";
       ending = "A room owner stopped the session.";
       break;
     }
@@ -491,11 +531,16 @@ async function main() {
     }
 
     if (control === "stopped") {
+      exitReason = "stopped";
       ending = "A room owner stopped the session.";
       break;
     }
     if (Date.now() >= deadline) {
-      ending = "The session reached its safe runtime limit.";
+      exitReason = control === "paused" ? "paused" : "runtime-limit";
+      ending =
+        control === "paused"
+          ? "The worker reached its safe runtime limit while the room was paused. It stayed off so the pause would be respected."
+          : "The worker reached its safe runtime limit.";
       break;
     }
 
@@ -530,19 +575,22 @@ async function main() {
     );
 
     if (results.every((result) => !result.ok)) {
+      exitReason = "all-failed";
       ending = "Every participant failed in the same round, so the runner stopped safely.";
       break;
     }
 
     round += 1;
+    completedThisRun += 1;
     comments = await github.getComments();
     control = resolveControlState(comments, startedAt);
     if (control === "stopped") {
+      exitReason = "stopped";
       ending = "A room owner stopped the session.";
       break;
     }
     if (control === "paused") continue;
-    if ((rounds !== 0 && round > rounds) || Date.now() >= deadline) break;
+    if ((rounds !== 0 && completedThisRun >= rounds) || Date.now() >= deadline) break;
 
     const elapsed = Date.now() - roundStartedAt;
     const rateSafeWait = Math.max(0, roundFloorSeconds * 1000 - elapsed);
@@ -550,7 +598,32 @@ async function main() {
     await sleep(Math.max(rateSafeWait, requestedWait));
   }
 
-  if (Date.now() >= deadline) ending = "The session reached its safe runtime limit.";
+  if (exitReason === "rounds-complete" && rounds === 0 && Date.now() >= deadline) {
+    exitReason = "runtime-limit";
+    ending = "The worker reached its safe runtime limit.";
+  }
+
+  if (exitReason === "runtime-limit") {
+    comments = await github.getComments();
+    const finalControl = resolveControlState(comments, startedAt);
+    if (finalControl === "stopped") {
+      exitReason = "stopped";
+      ending = "A room owner stopped the session.";
+    } else if (finalControl === "paused") {
+      exitReason = "paused";
+      ending = "The worker reached its safe runtime limit while the room was paused. It stayed off so the pause would be respected.";
+    }
+  }
+
+  const willHandoff = shouldAutoHandoff({
+    enabled: autoHandoff,
+    rounds,
+    exitReason,
+  });
+  const finalDetail = willHandoff
+    ? `${ending} A fresh worker is being started automatically; the conversation and round numbering will continue here.`
+    : ending;
+
   await github.updateComment(
     session.id,
     formatSessionComment({
@@ -558,9 +631,37 @@ async function main() {
       state: "complete",
       round: round - 1,
       agents,
-      detail: `${ending} Start the workflow again whenever you want the room to continue.`,
+      detail: finalDetail,
     }),
   );
+
+  if (willHandoff) {
+    try {
+      await github.dispatchWorkflow({
+        workflowFile,
+        ref: handoffRef,
+        inputs: {
+          issue_number: String(issueNumber),
+          rounds: "0",
+          pause_seconds: String(pauseSeconds),
+          model: modelOverride,
+          continuous: "true",
+        },
+      });
+    } catch (error) {
+      await github.updateComment(
+        session.id,
+        formatSessionComment({
+          runId,
+          state: "complete",
+          round: round - 1,
+          agents,
+          detail: `${ending} The automatic handoff failed, so this room needs one manual workflow start to continue.`,
+        }),
+      );
+      throw error;
+    }
+  }
 }
 
 const invokedPath = process.argv[1] ? pathToFileURL(process.argv[1]).href : "";
