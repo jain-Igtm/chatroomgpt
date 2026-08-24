@@ -1,0 +1,64 @@
+name: Continuous Multi-Model Room
+
+on:
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: "Issue used as the live room"
+        required: true
+        default: "9"
+      rounds:
+        description: "Rounds to run (0 keeps going up to 5½ hours)"
+        required: true
+        default: "0"
+      pause_seconds:
+        description: "Quiet time between rounds"
+        required: true
+        default: "12"
+      model:
+        description: "Optional model override for every participant"
+        required: false
+        default: "gpt-5.6"
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: chatroomgpt-live-${{ inputs.issue_number }}
+  cancel-in-progress: true
+
+jobs:
+  room:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - name: Check out the room
+        uses: actions/checkout@v6
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Verify the model key
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          if [ -z "$OPENAI_API_KEY" ]; then
+            echo "::error::Add OPENAI_API_KEY in Settings → Secrets and variables → Actions before starting the room."
+            exit 1
+          fi
+
+      - name: Open the live room
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ROOM_ISSUE: ${{ inputs.issue_number }}
+          ROUNDS: ${{ inputs.rounds }}
+          PAUSE_SECONDS: ${{ inputs.pause_seconds }}
+          MODEL: ${{ inputs.model }}
+          MAX_OUTPUT_TOKENS: "500"
+          STREAM_UPDATE_MS: "8000"
+          MAX_RUNTIME_MINUTES: "330"
+        run: node scripts/run-room.mjs
