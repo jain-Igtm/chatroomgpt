@@ -4,9 +4,12 @@ import test from "node:test";
 import {
   MutationQueue,
   formatAgentComment,
+  nextRoundNumber,
+  parseBoolean,
   parseEnvelope,
   readSseData,
   resolveControlState,
+  shouldAutoHandoff,
   stripEnvelope,
 } from "../scripts/run-room.mjs";
 
@@ -92,4 +95,44 @@ test("mutation queue never overlaps writes", async () => {
 
   assert.equal(maximumActive, 1);
   assert.deepEqual(order, [1, 2, 3]);
+});
+
+test("boolean workflow inputs are parsed without truthy string mistakes", () => {
+  assert.equal(parseBoolean("true"), true);
+  assert.equal(parseBoolean("false", true), false);
+  assert.equal(parseBoolean("0", true), false);
+  assert.equal(parseBoolean("unexpected", true), true);
+});
+
+test("automatic handoff only follows an infinite session reaching its limit", () => {
+  assert.equal(
+    shouldAutoHandoff({ enabled: true, rounds: 0, exitReason: "runtime-limit" }),
+    true,
+  );
+  assert.equal(
+    shouldAutoHandoff({ enabled: true, rounds: 8, exitReason: "runtime-limit" }),
+    false,
+  );
+  assert.equal(
+    shouldAutoHandoff({ enabled: true, rounds: 0, exitReason: "stopped" }),
+    false,
+  );
+  assert.equal(
+    shouldAutoHandoff({ enabled: false, rounds: 0, exitReason: "runtime-limit" }),
+    false,
+  );
+});
+
+test("a successor continues global round numbering", () => {
+  const comments = [
+    { body: "human message" },
+    {
+      body: '<!-- chatroomgpt:message {"round":17,"state":"complete"} -->\n### Nacre\n\nHello',
+    },
+    {
+      body: '<!-- chatroomgpt:message {"round":18,"state":"error"} -->\n### Kestrel\n\nLost',
+    },
+  ];
+
+  assert.equal(nextRoundNumber(comments), 19);
 });
